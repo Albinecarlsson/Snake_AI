@@ -35,14 +35,17 @@ GAME_SPEED = 400
 
 class GameAI:
     
-    def __init__(self, WINDOW_WIDTH = 400, WINDOW_HEIGHT = 400):
+    def __init__(self, WINDOW_WIDTH = 400, WINDOW_HEIGHT = 400, traning= False):
         self.WINDOW_WIDTH = WINDOW_WIDTH
         self.WINDOW_HEIGHT = WINDOW_HEIGHT
         # initialize display
-        self.display = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        pygame.display.set_caption('Snake')
+        self.training = traning
+        if not traning:
+            self.display = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+            pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
+
         
         
     def reset(self):
@@ -58,6 +61,8 @@ class GameAI:
         self.apple = None
         self.new_apple()
         self.frame_iteration = 0
+        self.board = pygame.surfarray.array2d()
+        print(self.board)
      
     def to_px(self,tile_unit):
         return tile_unit * TILE_SIZE
@@ -143,28 +148,29 @@ class GameAI:
             
             
     def update_ui(self):
-        # refill background colours
-        bg_colors = itertools.cycle([GREY1, GREY2])
-        for y in range(0, self.WINDOW_HEIGHT, TILE_SIZE):
-            for x in range(0, self.WINDOW_WIDTH, TILE_SIZE):
-                rect = (x, y, TILE_SIZE, TILE_SIZE)
-                pygame.draw.rect(self.display, next(bg_colors), rect)
-            next(bg_colors)
+        if not self.training:
+            # refill background colours
+            bg_colors = itertools.cycle([GREY1, GREY2])
+            for y in range(0, self.WINDOW_HEIGHT, TILE_SIZE):
+                for x in range(0, self.WINDOW_WIDTH, TILE_SIZE):
+                    rect = (x, y, TILE_SIZE, TILE_SIZE)
+                    pygame.draw.rect(self.display, next(bg_colors), rect)
+                next(bg_colors)
+            
+            #paint the snake
+            for bit in self.snake:
+                pygame.draw.rect(self.display, BLUE1, 
+                                pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
+                if (bit == self.head):
+                    pygame.draw.rect(self.display, BLUE2, 
+                                pygame.Rect(bit.x+4, bit.y+4, 12, 12))
         
-        #paint the snake
-        for bit in self.snake:
-            pygame.draw.rect(self.display, BLUE1, 
-                             pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
-            if (bit == self.head):
-                pygame.draw.rect(self.display, BLUE2, 
-                             pygame.Rect(bit.x+4, bit.y+4, 12, 12))
-       
-        # paint apple 
-        pygame.draw.rect(self.display, RED, [
-                        self.apple.x, self.apple.y, TILE_SIZE, TILE_SIZE]) 
-       
-        # update score 
-        font = pygame.font.SysFont('Monaco', 42)
-        score_img = font.render("Score: " + str(self.score), True, WHITE)
-        self.display.blit(score_img, [0, 0])
-        pygame.display.flip()
+            # paint apple 
+            pygame.draw.rect(self.display, RED, [
+                            self.apple.x, self.apple.y, TILE_SIZE, TILE_SIZE]) 
+        
+            # update score 
+            font = pygame.font.SysFont('Monaco', 42)
+            score_img = font.render("Score: " + str(self.score), True, WHITE)
+            self.display.blit(score_img, [0, 0])
+            pygame.display.flip()

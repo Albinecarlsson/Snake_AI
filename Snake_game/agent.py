@@ -9,17 +9,20 @@ from snake_game_AI import GameAI, dir, Cords, TILE_SIZE
 from model import QTrainer, Linear_QNet
 from helper import plot
 
-MAX_MEMORY = 100_000
+MAX_MEMORY = 1_000_000
 BATCH_SIZE = 1000
-LR = 0.005
+LR = 0.001
+
+# set torch default to GPU
+torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 class Agent:
     def __init__(self):
         self.nr_games = 0
-        self.epsilon = 0.3 # randomness
-        self.gamma = 0.7 # discount rate
+        self.epsilon = 0  # randomness
+        self.gamma = 0.7 # discount rate 
         self.memory = deque(maxlen=MAX_MEMORY) # if the queue get full it will popleft()
-        self.model = Linear_QNet(11,256,3) #a state have 11 params and we want an ansere of 3
+        self.model = Linear_QNet(14,256,3)#.to(device) #a state have 14 params and we want an answere of 3 with a hidden layer of 256
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         
     
@@ -29,6 +32,11 @@ class Agent:
         cord_r = Cords(head.x + TILE_SIZE, head.y)
         cord_u = Cords(head.x, head.y - TILE_SIZE)
         cord_d = Cords(head.x, head.y + TILE_SIZE)
+        
+        cord_ll = Cords(head.x - 2 * TILE_SIZE, head.y)
+        cord_rr = Cords(head.x + 2 * TILE_SIZE, head.y)
+        cord_uu = Cords(head.x, head.y - 2 * TILE_SIZE)
+        cord_dd = Cords(head.x, head.y + 2 * TILE_SIZE)
         
         dir_r = game.dir == dir.RIGHT
         dir_l = game.dir == dir.LEFT
@@ -54,44 +62,71 @@ class Agent:
             (dir_r and game.is_collision(cord_u)) or
             (dir_l and game.is_collision(cord_d)),
             
+            # small danger straight forward from snakes perspective
+            (dir_r and game.is_collision(cord_rr)) or
+            (dir_l and game.is_collision(cord_ll)) or
+            (dir_u and game.is_collision(cord_uu)) or
+            (dir_d and game.is_collision(cord_dd)),
+            
+            # small danger right from snakes perspective
+            (dir_u and game.is_collision(cord_rr)) or
+            (dir_d and game.is_collision(cord_ll)) or
+            (dir_l and game.is_collision(cord_uu)) or
+            (dir_r and game.is_collision(cord_dd)),
+            
+            # small danger left from snakes perspective
+            (dir_d and game.is_collision(cord_rr)) or
+            (dir_u and game.is_collision(cord_ll)) or
+            (dir_r and game.is_collision(cord_uu)) or
+            (dir_l and game.is_collision(cord_dd)), 
+            
             #Move direction
             dir_l,
             dir_r,
             dir_u,
             dir_d,
             
-            #Food location
+            #Apple location
             game.apple.x < game.head.x, # apple to the left 
             game.apple.x > game.head.x, # apple to the right
             game.apple.y < game.head.y, # apple upwards
             game.apple.y > game.head.y  # apple downwards
         ]
-        # return all true and false values as 1 respectivly 0 
+        # return all true and false values as 1 respectivly 0   array size 14
         return np.array(state, dtype=int)
     
     def remeber(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done)) # will pop left if memoery is full
+        self.memory.append((state, action, reward, next_state, done)) # will pop left if memoery is full since its a deque
+    
+    
     
     def train_long_memory(self):
+        # select batchsize if we have batchsize in memory
         if len(self.memory) > BATCH_SIZE:
-            sample = random.sample(self.memory, BATCH_SIZE) # return a random list of tuples of saved data
+            # return a random list of tuples of saved data
+            sample = random.sample(self.memory, BATCH_SIZE) 
         else:
+            # othervise take all of the memory
             sample = self.memory
-            
-        states, actions, rewards, next_states, dones = zip(*sample) # returns each values as a list of the same values (instead of using for loop)
+        # returns each values as a list of the same values (instead of using for loop)
+        states, actions, rewards, next_states, dones = zip(*sample) 
+        
         self.trainer.train_step(states, actions, rewards, next_states, dones)
+        
         
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
     
-    def get_action(self,state):
-        # random moves: tradeoff between exploration and exploitation 
-        self.epsilon = 80 - self.nr_games
+    def get_move(self,state):
+        # random moves: tradeoff between exploration and exploitation  where we train with random moves
+        self.epsilon = 80 - self.nr_games # decreasing with the nr of traning runs
         final_move = [0,0,0]
+        # randomness in the moves
         if random.randint(0, 200) < self.epsilon:
             move = random.randint(0, 2)
             final_move[move] = 1
         else:
+            # if not predict state with Neural network
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0) #predict in tensorflow 
             move = torch.argmax(prediction).item()
@@ -104,14 +139,14 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = GameAI()
+    game = GameAI(traning=False)
     #traning loop
     while True:
         # get old state
         state_old = agent.get_state(game)
         
         #get move
-        final_move = agent.get_action(state_old)
+        final_move = agent.get_move(state_old)
         
         # preform move and get new state
         reward, game_over, score = game.play_step(final_move)
@@ -132,9 +167,12 @@ def train():
             if score > record:
                 record = score
                 agent.model.save()
-                
+            
+            # if yo wanna see staticstic for each  run un comment line below
             print('Game', agent.nr_games, 'score', score, 'Record', record)
             
+            # create variables for ploting avg score and score for gamenr
+
             plot_scores.append(score)
             total_score += score
             avg_score = total_score / agent.nr_games
