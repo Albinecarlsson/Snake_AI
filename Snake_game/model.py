@@ -14,10 +14,10 @@ class Linear_QNet(nn.Module):
         super().__init__()
         self.linear1 = nn.Linear(input_size, hidden_size)
         self.relu1 = nn.ReLU()
-        self.linear2 = nn.Linear(hidden_size, 1024)
+        self.linear2 = nn.Linear(hidden_size, 512)
         self.relu2 = nn.ReLU()
-        self.linear3 = nn.Linear(1024, 512)
-        self.relu3 = nn.ReLU()
+        #self.linear3 = nn.Linear(1024, 512)
+        #self.relu3 = nn.ReLU()
         self.linear4 = nn.Linear(512, output_size)
         #self.linear4 = nn.Linear(hidden_size, output_size)
         
@@ -27,8 +27,8 @@ class Linear_QNet(nn.Module):
         x = self.relu1(x)
         x = self.linear2(x)
         x = self.relu2(x)
-        x = self.linear3(x)
-        x = self.relu3(x)
+        #x = self.linear3(x)
+        #x = self.relu3(x)
         x = self.linear4(x)
         return x
     

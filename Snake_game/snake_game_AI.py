@@ -37,7 +37,7 @@ GREY2 = (70, 70, 70)
 
 # game variables
 TILE_SIZE = 40
-GAME_SPEED = 200
+GAME_SPEED = 400
 
 
 class GameAI:
