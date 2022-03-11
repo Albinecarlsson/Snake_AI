@@ -43,7 +43,9 @@ class GameAI:
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
-        
+    
+    def px_to_idx(self,tile_unit):
+        return int(tile_unit / TILE_SIZE)      
         
     def reset(self):
         # initialization of the game state.
@@ -83,6 +85,7 @@ class GameAI:
         if (pt in self.snake[1:]):
             return True
         return False
+                
         
     def move(self, action):
         # [straight, right, left]
@@ -109,6 +112,12 @@ class GameAI:
             x+= TILE_SIZE
         self.head = Cords(x,y)
         
+        
+    def get_distance(self,apple,head):
+        x_power = np.power(self.px_to_idx(apple.x) - self.px_to_idx(head.x), 2)
+        y_power = np.power(self.px_to_idx(apple.y) - self.px_to_idx(head.y), 2)
+        return (np.sqrt(x_power + y_power))
+
     def play_step(self, action):
         self.frame_iteration += 1
         for event in pygame.event.get():

@@ -84,19 +84,57 @@ class Agent:
     def train_short_memory(self, state, action, reward, next_state, done):
         self.trainer.train_step(state, action, reward, next_state, done)
     
-    def get_action(self,state):
-        # random moves: tradeoff between exploration and exploitation 
-        self.epsilon = 80 - self.nr_games
-        final_move = [0,0,0]
-        if random.randint(0, 200) < self.epsilon:
-            move = random.randint(0, 2)
+    def get_action(self,state,game):
+        # random moves: tradeoff between exploration and exploitation  where we train with random moves
+        self.epsilon = 80 - self.nr_games # decreasing with the nr of traning runs
+        final_move = [0,0,0] # [straight, right, left]
+        # randomness in the moves
+        if random.randint(0,200) < self.epsilon:
+            
+            dist_left = (game.get_distance(game.apple, Cords(game.head.x - TILE_SIZE,game.head.y)))
+            col_left = game.is_collision(Cords(game.head.x - TILE_SIZE,game.head.y)) 
+            
+            dist_right = (game.get_distance(game.apple, Cords(game.head.x + TILE_SIZE,game.head.y)))
+            col_right = game.is_collision(Cords(game.head.x + TILE_SIZE,game.head.y)) 
+            
+            dist_up = (game.get_distance(game.apple, Cords(game.head.x,game.head.y - TILE_SIZE)))
+            col_up = game.is_collision(Cords(game.head.x,game.head.y - TILE_SIZE)) 
+            
+            dist_down = (game.get_distance(game.apple, Cords(game.head.x,game.head.y + TILE_SIZE)))
+            col_down = game.is_collision(Cords(game.head.x,game.head.y + TILE_SIZE)) 
+
+            if game.dir == dir.RIGHT:
+                move = np.argmin([dist_right,dist_down,dist_up])
+                if col_right and move == 0: move += 1
+                if col_down and move == 1: move += 1
+                if col_up and move == 2: move = 0
+            elif game.dir == dir.LEFT:
+                move = np.argmin([dist_left,dist_up,dist_down])
+                if col_left and move == 0: move += 1
+                if col_up and move == 1: move += 1
+                if col_down and move == 2: move = 0
+            elif game.dir == dir.UP:
+                move = np.argmin([dist_up,dist_right,dist_left])
+                if col_up and move == 0: move += 1
+                if col_right and move == 1: move += 1
+                if col_left and move == 2: move = 0
+            elif game.dir == dir.DOWN:
+                move = np.argmin([dist_down,dist_left,dist_right])
+                if col_down and move == 0: move += 1
+                if col_left and move == 1: move += 1
+                if col_right and move == 2: move = 0
+            else:
+                move = random.randint(0, 2)
             final_move[move] = 1
         else:
+            # if not predict state with Neural network
             state0 = torch.tensor(state, dtype=torch.float)
             prediction = self.model(state0) #predict in tensorflow 
             move = torch.argmax(prediction).item()
             final_move[move] = 1
+        print(final_move)
         return final_move
+
 
 def train():
     plot_scores = []
@@ -111,7 +149,7 @@ def train():
         state_old = agent.get_state(game)
         
         #get move
-        final_move = agent.get_action(state_old)
+        final_move = agent.get_action(state_old,game)
         
         # preform move and get new state
         reward, game_over, score = game.play_step(final_move)
