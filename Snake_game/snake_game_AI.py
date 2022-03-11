@@ -71,20 +71,29 @@ class GameAI:
             if self.apple in self.snake:
                 self.new_apple()
             
-
-    def is_collision(self, pt=None):
+    def is_collision_wall(self,pt=None):
         # if we hit the boarder
         if pt is None:
             pt = self.head
-            
+        # if we hit the boarder   
         if (pt.x > self.WINDOW_WIDTH - TILE_SIZE or
             pt.y > self.WINDOW_HEIGHT - TILE_SIZE or
             pt.x < 0 or pt.y < 0):
             return True
+        return False
+    
+    def is_collision_snake(self,pt=None):
+        if pt is None:
+            pt = self.head
         # if sanke hits snake
         if (pt in self.snake[1:]):
             return True
         return False
+
+
+
+    def is_collision(self, pt=None):
+        return self.is_collision_snake(pt) or self.is_collision_wall(pt)
                 
         
     def move(self, action):
@@ -132,10 +141,25 @@ class GameAI:
         #check if Game Over
         reward = 0
         GAME_OVER = False
-        if self.is_collision() or self.frame_iteration > 50*len(self.snake):
+        if self.is_collision_wall():
             GAME_OVER = True
-            reward = -10
+            reward = -500
             return reward, GAME_OVER, self.score
+
+       #check if Game Over
+        GAME_OVER = False
+        if self.is_collision_snake():
+            GAME_OVER = True
+            reward = -100
+            return reward, GAME_OVER, self.score
+
+        #check if Game Over
+        GAME_OVER = False
+        if self.frame_iteration > 30*len(self.snake):
+            GAME_OVER = True
+            reward = -50
+            return reward, GAME_OVER, self.score
+
 
         # place new food
         if self.head == self.apple:
