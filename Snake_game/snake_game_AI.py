@@ -16,9 +16,7 @@ class dir(Enum):
     RIGHT = 4
     
 Cords = namedtuple('Cords', 'x, y')
-
 pygame.init()
-
 
 #Colours
 WHITE = (255, 255, 255)
@@ -35,11 +33,12 @@ GAME_SPEED = 400
 
 class GameAI:
     
-    def __init__(self, WINDOW_WIDTH = 400, WINDOW_HEIGHT = 400):
-        self.WINDOW_WIDTH = WINDOW_WIDTH
-        self.WINDOW_HEIGHT = WINDOW_HEIGHT
+    def __init__(self, WIDTH = 400, HEIGHT = 400):
+        self.WIDTH = WIDTH
+        self.HEIGHT = HEIGHT
+        
         # initialize display
-        self.display = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        self.display = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
@@ -51,7 +50,7 @@ class GameAI:
         # initialization of the game state.
         #snake stuff
         self.dir = dir.RIGHT
-        self.head = Cords(self.WINDOW_WIDTH/2,self.WINDOW_HEIGHT/2)
+        self.head = Cords(self.WIDTH/2,self.HEIGHT/2)
         self.snake = [self.head,
                       Cords(self.head.x-TILE_SIZE,self.head.y),
                       Cords(self.head.x- (2*TILE_SIZE),self.head.y)]
@@ -59,15 +58,17 @@ class GameAI:
         self.score = 0
         self.apple = None
         self.new_apple()
-        self.frame_iteration = 0
+        self.steps_made = 0
      
     def to_px(self,tile_unit):
         return tile_unit * TILE_SIZE
         
     def new_apple(self):
-            x = random.randint(0, (self.WINDOW_WIDTH-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
-            y = random.randint(0, (self.WINDOW_HEIGHT-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
+            # Generate random cords to spawn apple 
+            x = random.randint(0, (self.WIDTH-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
+            y = random.randint(0, (self.HEIGHT-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
             self.apple = Cords(x,y)
+            # if apple is on snake replace apple
             if self.apple in self.snake:
                 self.new_apple()
             
@@ -75,23 +76,22 @@ class GameAI:
         # if we hit the boarder
         if pt is None:
             pt = self.head
-        # if we hit the boarder   
-        if (pt.x > self.WINDOW_WIDTH - TILE_SIZE or
-            pt.y > self.WINDOW_HEIGHT - TILE_SIZE or
+        if (pt.x > self.WIDTH - TILE_SIZE or
+            pt.y > self.HEIGHT - TILE_SIZE or
             pt.x < 0 or pt.y < 0):
             return True
         return False
     
     def is_collision_snake(self,pt=None):
+        # if sanke hits snake
         if pt is None:
             pt = self.head
-        # if sanke hits snake
         if (pt in self.snake[1:]):
             return True
         return False
 
 
-
+    # Check if there is a collison
     def is_collision(self, pt=None):
         return self.is_collision_snake(pt) or self.is_collision_wall(pt)
                 
@@ -101,6 +101,7 @@ class GameAI:
         clock_wise = [dir.RIGHT, dir.DOWN, dir.LEFT, dir.UP]
         idx = clock_wise.index(self.dir)
         
+        # Update direction
         if np.array_equal(action, [1,0,0]): # go straight
             new_dir = clock_wise[idx]
         elif np.array_equal(action, [0,1,0]): # turn right 
@@ -109,6 +110,7 @@ class GameAI:
             new_dir = clock_wise[(idx-1) % 4] # turn left
         self.dir = new_dir
         
+        # Move in the new direction
         x = self.head.x
         y = self.head.y
         if self.dir == dir.UP:
@@ -121,14 +123,15 @@ class GameAI:
             x+= TILE_SIZE
         self.head = Cords(x,y)
         
-        
+    # Calculate distance form food to snake head    
     def get_distance(self,apple,head):
         x_power = np.power(self.px_to_idx(apple.x) - self.px_to_idx(head.x), 2)
         y_power = np.power(self.px_to_idx(apple.y) - self.px_to_idx(head.y), 2)
         return (np.sqrt(x_power + y_power))
 
     def play_step(self, action):
-        self.frame_iteration += 1
+        self.steps_made += 1
+        # Quit if pygame is quit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -155,7 +158,7 @@ class GameAI:
 
         #check if Game Over
         GAME_OVER = False
-        if self.frame_iteration > 30*len(self.snake):
+        if self.steps_made > 30*len(self.snake):
             GAME_OVER = True
             reward = -50
             return reward, GAME_OVER, self.score
@@ -178,8 +181,8 @@ class GameAI:
     def update_ui(self):
         # refill background colours
         bg_colors = itertools.cycle([GREY1, GREY2])
-        for y in range(0, self.WINDOW_HEIGHT, TILE_SIZE):
-            for x in range(0, self.WINDOW_WIDTH, TILE_SIZE):
+        for y in range(0, self.HEIGHT, TILE_SIZE):
+            for x in range(0, self.WIDTH, TILE_SIZE):
                 rect = (x, y, TILE_SIZE, TILE_SIZE)
                 pygame.draw.rect(self.display, next(bg_colors), rect)
             next(bg_colors)
