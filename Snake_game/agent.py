@@ -23,41 +23,13 @@ class Agent:
         self.epsilon = 0  # randomness
         self.gamma = 0.7 # discount rate 
         self.memory = deque(maxlen=MAX_MEMORY) # if the queue get full it will popleft()
-        self.model = Linear_QNet(104,256,3)#.to(device) #a state have 14 params and we want an answere of 3 with a hidden layer of 256
+        self.model = Linear_QNet(100,256,3)#.to(device) #a state have 14 params and we want an answere of 3 with a hidden layer of 256
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         
     
     def get_state(self, game):
-        head = game.snake[0]
-        cord_l = Cords(head.x - TILE_SIZE, head.y)
-        cord_r = Cords(head.x + TILE_SIZE, head.y)
-        cord_u = Cords(head.x, head.y - TILE_SIZE)
-        cord_d = Cords(head.x, head.y + TILE_SIZE)
         
-        cord_ll = Cords(head.x - 2 * TILE_SIZE, head.y)
-        cord_rr = Cords(head.x + 2 * TILE_SIZE, head.y)
-        cord_uu = Cords(head.x, head.y - 2 * TILE_SIZE)
-        cord_dd = Cords(head.x, head.y + 2 * TILE_SIZE)
-        
-        dir_r = game.dir == dir.RIGHT
-        dir_l = game.dir == dir.LEFT
-        dir_u = game.dir == dir.UP
-        dir_d = game.dir == dir.DOWN
-        
-        state = [       
-            #Move direction
-            #dir_l,
-            #dir_r,
-            #dir_u,
-            #dir_d, 
-            #Apple location
-            #game.apple.x < game.head.x, # apple to the left 
-            #game.apple.x > game.head.x, # apple to the right
-            #game.apple.y < game.head.y, # apple upwards
-            #game.apple.y > game.head.y  # apple downwards
-
-            # gameboard   
-        ]
+        state = []
         [state.append(pos) for row in game.board for pos in row]
         
         # return all true and false values as 1 respectivly 0   array size 15        
