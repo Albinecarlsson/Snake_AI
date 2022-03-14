@@ -189,7 +189,8 @@ class Agent:
                     if col_right and move == 2: move = 0
                 else: # probably redundant
                     move = random.randint(0, 2)
-                    final_move[move] = 1
+                final_move[move] = 1
+                print(final_move)
             else:
                 # make move with the neural network
                 state = torch.tensor(state, dtype=torch.float)
