@@ -12,7 +12,7 @@ from helper import plot
 
 MAX_MEMORY = 1_000_000
 BATCH_SIZE = 1000
-LR = 0.001
+LR = 0.005
 
 # set torch default to GPU
 torch.set_default_tensor_type('torch.cuda.FloatTensor')
@@ -21,8 +21,8 @@ class Agent:
     def __init__(self):
         self.nr_games = 0
         self.itervalue = 1
-        self.gamma = 0.85 # discount rate 
         self.epsilon = 1000  # randomness
+        self.gamma = 0.7 # discount rate 
         self.memory = deque(maxlen=MAX_MEMORY) # if the queue get full it will popleft()
         self.model = Linear_QNet(100,2048,3)#.to(device) #a state have 14 params and we want an answere of 3 with a hidden layer of 256
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)

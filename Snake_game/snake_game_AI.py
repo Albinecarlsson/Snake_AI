@@ -159,21 +159,21 @@ class GameAI:
         
         if self.is_collision_wall():
             GAME_OVER = True
-            reward = int(-2000 + 10 * len(self.snake))
+            reward = int(-200 + 2 * len(self.snake))
             return reward, GAME_OVER, self.score
 
        #check if Game Over
         GAME_OVER = False
         if self.is_collision_snake():
             GAME_OVER = True
-            reward = int(-1000 + 10 * len(self.snake))
+            reward = int(-100 + 2 * len(self.snake))
             return reward, GAME_OVER, self.score
 
         #check if Game Over
         GAME_OVER = False
         if self.steps_made > 30*len(self.snake):
             GAME_OVER = True
-            reward = -800 + 10 * len(self.snake)
+            reward = -200 
             return reward, GAME_OVER, self.score
         
         self.update_snake()
@@ -182,7 +182,7 @@ class GameAI:
         if self.head == self.apple:
             self.score+=1 
             self.steps_made = 0
-            reward = 50 * len(self.snake)
+            reward = 10 * len(self.snake)
             self.new_apple()
         else:
             remove = self.snake.pop()
@@ -193,9 +193,9 @@ class GameAI:
             new_distance = self.get_distance(self.apple,self.head)
             
             if new_distance < old_distance + 0.1:
-                reward = 4
+                reward = 1
             else:
-                reward = -10
+                reward = -1
             
         self.update_ui()
         self.clock.tick(GAME_SPEED)
