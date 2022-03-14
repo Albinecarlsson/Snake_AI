@@ -32,7 +32,6 @@ GAME_SPEED = 400
 
 
 class GameAI:
-    
     def __init__(self, WIDTH = 400, HEIGHT = 400, training=False):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
@@ -140,46 +139,60 @@ class GameAI:
 
     def play_step(self, action):
         self.steps_made += 1
-        # Quit if pygame is quit
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 quit()
                 
+        old_distance = self.get_distance(self.apple,self.head)
+        
         #move the snake
         self.move(action)
         self.snake.insert(0,self.head)
-    
+        print(self.board)
         #check if Game Over
         reward = 0
         GAME_OVER = False
+        
         if self.is_collision_wall():
             GAME_OVER = True
-            reward = -500
+            reward = int(-200 + 2 * len(self.snake))
             return reward, GAME_OVER, self.score
 
        #check if Game Over
         GAME_OVER = False
         if self.is_collision_snake():
             GAME_OVER = True
-            reward = -100
+            reward = int(-100 +  len(self.snake))
             return reward, GAME_OVER, self.score
 
         #check if Game Over
         GAME_OVER = False
         if self.steps_made > 30*len(self.snake):
             GAME_OVER = True
-            reward = -50
+            reward = -200
             return reward, GAME_OVER, self.score
-
+        
+        self.update_snake()
 
         # place new food
         if self.head == self.apple:
-            self.score+=1
-            reward = 10
+            self.score+=1 
+            self.steps_made = 0
+            reward = 10 * len(self.snake)
             self.new_apple()
         else:
-            self.snake.pop()
+            remove = self.snake.pop()
+            #print(remove)
+            self.board[self.px_to_idx(remove.x)][self.px_to_idx(remove.y)] = 0
+            self.update_snake()
+        
+            new_distance = self.get_distance(self.apple,self.head)
+            
+            if new_distance < old_distance + 0.1:
+                reward = 1
+            else:
+                reward = -1
             
         self.update_ui()
         self.clock.tick(GAME_SPEED)
