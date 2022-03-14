@@ -214,7 +214,7 @@ def train():
     total_score = 0
     record = 0
     agent = Agent()
-    game = GameAI(training=False)
+    game = GameAI()
     #traning loop
     while True:
         # get old state
