@@ -125,13 +125,13 @@ def train():
     while True:
         # get old state
         state_old = agent.get_state(game)
-        
         #get move
         final_move = agent.get_move(state_old,game)
         
         # preform move and get new state
         reward, game_over, score = game.play_step(final_move)
         state_new = agent.get_state(game)
+
         
         #train short memory
         agent.train_short_memory(state_old, final_move, reward, state_new, game_over)

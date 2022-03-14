@@ -180,7 +180,7 @@ class GameAI:
 
         # place new food
         if self.head == self.apple:
-            self.score+=1
+            self.score+=1 
             self.steps_made = 0
             reward = 50 * len(self.snake)
             self.new_apple()
@@ -192,10 +192,10 @@ class GameAI:
         
             new_distance = self.get_distance(self.apple,self.head)
             
-            if new_distance < old_distance + 0.2:
-                reward = 3
+            if new_distance < old_distance + 0.1:
+                reward = 4
             else:
-                reward = -5
+                reward = -10
             
         self.update_ui()
         self.clock.tick(GAME_SPEED)
