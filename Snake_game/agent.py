@@ -22,7 +22,7 @@ class Agent:
         self.epsilon = 1000 # randomness
         self.gamma = 0.7 # discount rate
         self.memory = deque(maxlen=MAX_MEMORY) # if the queue get full it will popleft()
-        self.model = Linear_QNet(11,512,3) #a state have 11 params and we want an ansere of 3
+        self.model = Linear_QNet(20,512,3) #a state have 11 params and we want an ansere of 3
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
         
     
@@ -60,22 +60,22 @@ class Agent:
             (dir_d and game.is_collision(cord_d)),
             
             # danger straight forward from snakes perspective
-        #    (dir_r and game.is_collision(cord_r2)) or
-        #    (dir_l and game.is_collision(cord_l2)) or
-        #    (dir_u and game.is_collision(cord_u2)) or
-        #    (dir_d and game.is_collision(cord_d2)),
+            (dir_r and game.is_collision(cord_r2)) or
+            (dir_l and game.is_collision(cord_l2)) or
+            (dir_u and game.is_collision(cord_u2)) or
+            (dir_d and game.is_collision(cord_d2)),
             
             # danger straight forward from snakes perspective
-        #    (dir_r and game.is_collision(cord_r3)) or
-        #    (dir_l and game.is_collision(cord_l3)) or
-        #    (dir_u and game.is_collision(cord_u3)) or
-        #    (dir_d and game.is_collision(cord_d3)),
+            (dir_r and game.is_collision(cord_r3)) or
+            (dir_l and game.is_collision(cord_l3)) or
+            (dir_u and game.is_collision(cord_u3)) or
+            (dir_d and game.is_collision(cord_d3)),
             
             # danger straight forward from snakes perspective
-        #    (dir_r and game.is_collision(cord_r4)) or
-        #    (dir_l and game.is_collision(cord_l4)) or
-        #    (dir_u and game.is_collision(cord_u4)) or
-        #    (dir_d and game.is_collision(cord_d4)),
+            (dir_r and game.is_collision(cord_r4)) or
+            (dir_l and game.is_collision(cord_l4)) or
+            (dir_u and game.is_collision(cord_u4)) or
+            (dir_d and game.is_collision(cord_d4)),
             
             # danger right from snakes perspective
             (dir_u and game.is_collision(cord_r)) or
@@ -83,20 +83,20 @@ class Agent:
             (dir_l and game.is_collision(cord_u)) or
             (dir_r and game.is_collision(cord_d)),
             # danger right from snakes perspective
-        #    (dir_u and game.is_collision(cord_r2)) or
-        #    (dir_d and game.is_collision(cord_l2)) or
-        #    (dir_l and game.is_collision(cord_u2)) or
-        #    (dir_r and game.is_collision(cord_d2)),
+            (dir_u and game.is_collision(cord_r2)) or
+            (dir_d and game.is_collision(cord_l2)) or
+            (dir_l and game.is_collision(cord_u2)) or
+            (dir_r and game.is_collision(cord_d2)),
             # danger right from snakes perspective
-        #    (dir_u and game.is_collision(cord_r3)) or
-        #    (dir_d and game.is_collision(cord_l3)) or
-        #    (dir_l and game.is_collision(cord_u3)) or
-        #    (dir_r and game.is_collision(cord_d3)),
+            (dir_u and game.is_collision(cord_r3)) or
+            (dir_d and game.is_collision(cord_l3)) or
+            (dir_l and game.is_collision(cord_u3)) or
+            (dir_r and game.is_collision(cord_d3)),
             # danger right from snakes perspective
-        #    (dir_u and game.is_collision(cord_r4)) or
-        #    (dir_d and game.is_collision(cord_l4)) or
-        #    (dir_l and game.is_collision(cord_u4)) or
-        #    (dir_r and game.is_collision(cord_d4)),
+            (dir_u and game.is_collision(cord_r4)) or
+            (dir_d and game.is_collision(cord_l4)) or
+            (dir_l and game.is_collision(cord_u4)) or
+            (dir_r and game.is_collision(cord_d4)),
             
             # danger left from snakes perspective
             (dir_d and game.is_collision(cord_r)) or
@@ -104,20 +104,20 @@ class Agent:
             (dir_r and game.is_collision(cord_u)) or
             (dir_l and game.is_collision(cord_d)),
             # danger left from snakes perspective
-        #    (dir_d and game.is_collision(cord_r2)) or
-        #    (dir_u and game.is_collision(cord_l2)) or
-        #    (dir_r and game.is_collision(cord_u2)) or
-        #    (dir_l and game.is_collision(cord_d2)),
+            (dir_d and game.is_collision(cord_r2)) or
+            (dir_u and game.is_collision(cord_l2)) or
+            (dir_r and game.is_collision(cord_u2)) or
+            (dir_l and game.is_collision(cord_d2)),
             # danger left from snakes perspective
-        #    (dir_d and game.is_collision(cord_r3)) or
-        #    (dir_u and game.is_collision(cord_l3)) or
-        #    (dir_r and game.is_collision(cord_u3)) or
-        #    (dir_l and game.is_collision(cord_d3)),
+            (dir_d and game.is_collision(cord_r3)) or
+            (dir_u and game.is_collision(cord_l3)) or
+            (dir_r and game.is_collision(cord_u3)) or
+            (dir_l and game.is_collision(cord_d3)),
             # danger left from snakes perspective
-        #    (dir_d and game.is_collision(cord_r4)) or
-        #    (dir_u and game.is_collision(cord_l4)) or
-        #    (dir_r and game.is_collision(cord_u4)) or
-        #    (dir_l and game.is_collision(cord_d4)),
+            (dir_d and game.is_collision(cord_r4)) or
+            (dir_u and game.is_collision(cord_l4)) or
+            (dir_r and game.is_collision(cord_u4)) or
+            (dir_l and game.is_collision(cord_d4)),
             
             #Move direction
             dir_l,
@@ -243,7 +243,7 @@ def train():
             agent.train_long_memory()
             if score > record:
                 record = score
-                agent.model.save(file_name='base_case.pth')
+                agent.model.save(file_name='extra_vision_case.pth')
             
             # if yo wanna see staticstic for each  run un comment line below
             #print('Game', agent.nr_games, 'score', score, 'Record', record)
