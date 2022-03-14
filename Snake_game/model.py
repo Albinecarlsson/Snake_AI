@@ -4,7 +4,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 import os
 
-
+# set torch default to GPU
+torch.set_default_tensor_type('torch.cuda.FloatTensor')
 
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -25,7 +26,16 @@ class Linear_QNet(nn.Module):
             
             file_name = os.path.join(model_folder_path, file_name)
             torch.save(self.state_dict(), file_name)
-            
+
+    def load(self, file_name='test.pth'):
+        model_folder_path = './model'
+        file_name = os.path.join(model_folder_path, file_name)
+        self.load_state_dict(torch.load(file_name))
+        self.eval()
+        for param in self.parameters():
+            print(param)
+        print("loaded!")
+
 class QTrainer:
     def __init__(self, model, lr, gamma):
         self.model = model

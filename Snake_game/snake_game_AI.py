@@ -33,18 +33,24 @@ GAME_SPEED = 400
 
 class GameAI:
     
-    def __init__(self, WIDTH = 400, HEIGHT = 400):
+    def __init__(self, WIDTH = 400, HEIGHT = 400, training=False):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
-        
         # initialize display
-        self.display = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
-        pygame.display.set_caption('Snake')
+        self.training = training
+        if not training:
+            self.display = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
+            pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
     
     def px_to_idx(self,tile_unit):
         return int(tile_unit / TILE_SIZE)      
+
+    def update_snake(self):
+        for bit in self.snake:
+            self.board[self.px_to_idx(bit.x)][self.px_to_idx(bit.y)] = 1
+        self.board[self.px_to_idx(self.head.x)][self.px_to_idx(self.head.y)] = 2
         
     def reset(self):
         # initialization of the game state.
@@ -57,6 +63,9 @@ class GameAI:
         # apple stuff
         self.score = 0
         self.apple = None
+        self.steps_made = 0
+        self.board = np.zeros((self.px_to_idx(self.WIDTH),self.px_to_idx(self.HEIGHT)))
+        self.update_snake()
         self.new_apple()
         self.steps_made = 0
      
