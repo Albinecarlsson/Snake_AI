@@ -150,7 +150,7 @@ def train():
             agent.train_long_memory()
             if score > record:
                 record = score
-                agent.model.save()
+                agent.model.save('model_prediced_mapview')
             
             # if yo wanna see staticstic for each  run un comment line below
             #print('Game', agent.nr_games, 'score', score, 'Record', record)
