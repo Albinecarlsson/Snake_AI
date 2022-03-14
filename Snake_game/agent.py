@@ -61,41 +61,41 @@ class Agent:
         if training:
             # random moves: tradeoff between exploration and exploitation  where we train with random moves
             # if not predict state with Neural network
-            if random.randint(0,5*self.nr_games) < self.epsilon:
-                dist_left = (game.get_distance(game.apple, Cords(game.head.x - TILE_SIZE,game.head.y)))
-                col_left = game.is_collision(Cords(game.head.x - TILE_SIZE,game.head.y)) 
+            if random.randint(0,25*self.nr_games) < self.epsilon:
+            #    dist_left = (game.get_distance(game.apple, Cords(game.head.x - TILE_SIZE,game.head.y)))
+            #    col_left = game.is_collision(Cords(game.head.x - TILE_SIZE,game.head.y)) 
                 
-                dist_right = (game.get_distance(game.apple, Cords(game.head.x + TILE_SIZE,game.head.y)))
-                col_right = game.is_collision(Cords(game.head.x + TILE_SIZE,game.head.y)) 
+            #    dist_right = (game.get_distance(game.apple, Cords(game.head.x + TILE_SIZE,game.head.y)))
+            #    col_right = game.is_collision(Cords(game.head.x + TILE_SIZE,game.head.y)) 
                 
-                dist_up = (game.get_distance(game.apple, Cords(game.head.x,game.head.y - TILE_SIZE)))
-                col_up = game.is_collision(Cords(game.head.x,game.head.y - TILE_SIZE)) 
+            #    dist_up = (game.get_distance(game.apple, Cords(game.head.x,game.head.y - TILE_SIZE)))
+            #    col_up = game.is_collision(Cords(game.head.x,game.head.y - TILE_SIZE)) 
                 
-                dist_down = (game.get_distance(game.apple, Cords(game.head.x,game.head.y + TILE_SIZE)))
-                col_down = game.is_collision(Cords(game.head.x,game.head.y + TILE_SIZE)) 
+            #    dist_down = (game.get_distance(game.apple, Cords(game.head.x,game.head.y + TILE_SIZE)))
+            #    col_down = game.is_collision(Cords(game.head.x,game.head.y + TILE_SIZE)) 
 
-                if game.dir == dir.RIGHT:
-                    move = np.argmin([dist_right,dist_down,dist_up])
-                    if col_right and move == 0: move += 1
-                    if col_down and move == 1: move += 1
-                    if col_up and move == 2: move = 0
-                elif game.dir == dir.LEFT:
-                    move = np.argmin([dist_left,dist_up,dist_down])
-                    if col_left and move == 0: move += 1
-                    if col_up and move == 1: move += 1
-                    if col_down and move == 2: move = 0
-                elif game.dir == dir.UP:
-                    move = np.argmin([dist_up,dist_right,dist_left])
-                    if col_up and move == 0: move += 1
-                    if col_right and move == 1: move += 1
-                    if col_left and move == 2: move = 0
-                elif game.dir == dir.DOWN:
-                    move = np.argmin([dist_down,dist_left,dist_right])
-                    if col_down and move == 0: move += 1
-                    if col_left and move == 1: move += 1
-                    if col_right and move == 2: move = 0
-                else: # probably redundant
-                    move = random.randint(0, 2)
+            #    if game.dir == dir.RIGHT:
+            #        move = np.argmin([dist_right,dist_down,dist_up])
+            #        if col_right and move == 0: move += 1
+            #        if col_down and move == 1: move += 1
+            #        if col_up and move == 2: move = 0
+            #    elif game.dir == dir.LEFT:
+            #        move = np.argmin([dist_left,dist_up,dist_down])
+            #        if col_left and move == 0: move += 1
+            #        if col_up and move == 1: move += 1
+            #        if col_down and move == 2: move = 0
+            #    elif game.dir == dir.UP:
+            #        move = np.argmin([dist_up,dist_right,dist_left])
+            #        if col_up and move == 0: move += 1
+            #        if col_right and move == 1: move += 1
+            #        if col_left and move == 2: move = 0
+            #    elif game.dir == dir.DOWN:
+            #        move = np.argmin([dist_down,dist_left,dist_right])
+            #        if col_down and move == 0: move += 1
+            #        if col_left and move == 1: move += 1
+            #        if col_right and move == 2: move = 0
+            #    else: # probably redundant
+                move = random.randint(0, 2)
                 final_move[move] = 1
             else:
                 # make move with the neural network
