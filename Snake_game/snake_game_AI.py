@@ -21,6 +21,7 @@ pygame.init()
 #Colours
 WHITE = (255, 255, 255)
 RED = (200,0,0)
+GREEN = (0,255,0)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 GREY1 = (120, 120, 120)
@@ -146,6 +147,8 @@ class GameAI:
                 pygame.quit()
                 quit()
                 
+        old_distance = self.get_distance(self.apple,self.head)
+                
         #move the snake
         self.move(action)
         self.snake.insert(0,self.head)
@@ -155,21 +158,21 @@ class GameAI:
         GAME_OVER = False
         if self.is_collision_wall():
             GAME_OVER = True
-            reward = -500
+            reward = int(-200 + 2 * len(self.snake))
             return reward, GAME_OVER, self.score
 
        #check if Game Over
         GAME_OVER = False
         if self.is_collision_snake():
             GAME_OVER = True
-            reward = -100
+            reward = int(-100 +  len(self.snake))
             return reward, GAME_OVER, self.score
 
         #check if Game Over
         GAME_OVER = False
         if self.steps_made > 30*len(self.snake):
             GAME_OVER = True
-            reward = -50
+            reward = -200
             return reward, GAME_OVER, self.score
 
 
@@ -179,12 +182,21 @@ class GameAI:
             reward = 10
             self.new_apple()
         else:
-            self.snake.pop()
+            remove = self.snake.pop()
+            #print(remove)
+            self.board[self.px_to_idx(remove.x)][self.px_to_idx(remove.y)] = 0
+            self.update_snake()
+        
+            new_distance = self.get_distance(self.apple,self.head)
+            
+            if new_distance < old_distance + 0.1:
+                reward = 1
+            else:
+                reward = -1
             
         self.update_ui()
         self.clock.tick(GAME_SPEED)
         return reward, GAME_OVER, self.score
-            
             
             
     def update_ui(self):
@@ -198,11 +210,11 @@ class GameAI:
         
         #paint the snake
         for bit in self.snake:
-            pygame.draw.rect(self.display, BLUE1, 
+            pygame.draw.rect(self.display, GREEN, 
                              pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
             if (bit == self.head):
-                pygame.draw.rect(self.display, BLUE2, 
-                             pygame.Rect(bit.x+4, bit.y+4, 12, 12))
+                pygame.draw.rect(self.display, BLUE1, 
+                             pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
        
         # paint apple 
         pygame.draw.rect(self.display, RED, [
