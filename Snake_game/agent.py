@@ -61,7 +61,7 @@ class Agent:
         if training:
             # random moves: tradeoff between exploration and exploitation  where we train with random moves
             # if not predict state with Neural network
-            if random.randint(0,5*self.nr_games) < self.epsilon:
+            if random.randint(0,25*self.nr_games) < self.epsilon:
                 dist_left = (game.get_distance(game.apple, Cords(game.head.x - TILE_SIZE,game.head.y)))
                 col_left = game.is_collision(Cords(game.head.x - TILE_SIZE,game.head.y)) 
                 
