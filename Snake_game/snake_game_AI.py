@@ -21,6 +21,7 @@ pygame.init()
 #Colours
 WHITE = (255, 255, 255)
 RED = (200,0,0)
+GREEN = (0,255,0)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 GREY1 = (120, 120, 120)
@@ -211,11 +212,11 @@ class GameAI:
         
         #paint the snake
         for bit in self.snake:
-            pygame.draw.rect(self.display, BLUE1, 
+            pygame.draw.rect(self.display, GREEN, 
                              pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
             if (bit == self.head):
-                pygame.draw.rect(self.display, BLUE2, 
-                             pygame.Rect(bit.x+4, bit.y+4, 12, 12))
+                pygame.draw.rect(self.display, BLUE1, 
+                             pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
        
         # paint apple 
         pygame.draw.rect(self.display, RED, [
