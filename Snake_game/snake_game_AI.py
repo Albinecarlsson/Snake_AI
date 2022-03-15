@@ -28,7 +28,7 @@ GREY2 = (70, 70, 70)
 
 # game variables
 TILE_SIZE = 40
-GAME_SPEED = 400
+GAME_SPEED = 2
 
 
 class GameAI:
@@ -189,7 +189,7 @@ class GameAI:
         
             new_distance = self.get_distance(self.apple,self.head)
             
-            if new_distance < old_distance + 0.1:
+            if new_distance < old_distance:
                 reward = 1
             else:
                 reward = -1
