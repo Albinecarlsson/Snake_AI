@@ -263,7 +263,7 @@ def evaluate(training=False):
     record = 0
     agent = Agent()
     game = GameAI(training=False)
-    agent.model.load()
+    agent.model.load('C:/Users/albin/OneDrive/Dokument/Github/Snake_AI/model/extra_vision_predict_move.pth')
 
  #traning loop
     while True:
@@ -294,7 +294,7 @@ def evaluate(training=False):
 
 
 if __name__ == '__main__':
-    training = True
+    training = False
     if training:
         train()
     else:

@@ -190,7 +190,7 @@ class GameAI:
         
             new_distance = self.get_distance(self.apple,self.head)
             
-            if new_distance < old_distance + 0.1:
+            if new_distance < old_distance:
                 reward = 1
             else:
                 reward = -1
