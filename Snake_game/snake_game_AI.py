@@ -10,7 +10,6 @@ import numpy as np
 from torch import zero_
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 
-
 class dir(Enum):
     UP = 1
     DOWN = 2
@@ -18,14 +17,7 @@ class dir(Enum):
     RIGHT = 4
     
 Cords = namedtuple('Cords', 'x, y')
-
 pygame.init()
-
-
-class SV(Enum):
-    SNAKEBODY = 1
-    SNAKEHEAD = 2
-    APPLE = 3
 
 #Colours
 WHITE = (255, 255, 255)
@@ -62,7 +54,7 @@ class GameAI:
         self.board[self.px_to_idx(self.head.x)][self.px_to_idx(self.head.y)] = 2
         
     def reset(self):
-        # initialization of the game state.
+        # initialization of new game
         #snake stuff
         self.dir = dir.RIGHT
         self.head = Cords(self.WIDTH/2,self.HEIGHT/2)
@@ -72,21 +64,21 @@ class GameAI:
         # apple stuff
         self.score = 0
         self.apple = None
+
         self.steps_made = 0
         self.board = np.zeros((self.px_to_idx(self.WIDTH),self.px_to_idx(self.HEIGHT)))
         self.update_snake()
         self.new_apple()
 
-        
     def new_apple(self):
-            x = random.randint(0, (self.WIDTH-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
-            y = random.randint(0, (self.HEIGHT-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
-            self.apple = Cords(x,y)
-            self.board[self.px_to_idx(x)][self.px_to_idx(y)] = 3
-            if self.apple in self.snake:
-                self.new_apple()
+        #place new apple and update
+        x = random.randint(0, (self.WIDTH-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
+        y = random.randint(0, (self.HEIGHT-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
+        self.apple = Cords(x,y)
+        self.board[self.px_to_idx(x)][self.px_to_idx(y)] = 3
+        if self.apple in self.snake:
+            self.new_apple()
             
-
     def is_collision_wall(self,pt=None):
         # if we hit the boarder
         if pt is None:
@@ -134,11 +126,13 @@ class GameAI:
         elif self.dir == dir.RIGHT:
             x+= TILE_SIZE
         self.head = Cords(x,y)
+    
     # euclidan dist 
     def get_distance(self,apple,head):
         x_power = np.power(self.px_to_idx(apple.x) - self.px_to_idx(head.x), 2)
         y_power = np.power(self.px_to_idx(apple.y) - self.px_to_idx(head.y), 2)
         return (np.sqrt(x_power + y_power))
+    
         
     def play_step(self, action):
         self.steps_made += 1
@@ -186,13 +180,12 @@ class GameAI:
             self.new_apple()
         else:
             remove = self.snake.pop()
-            #print(remove)
             self.board[self.px_to_idx(remove.x)][self.px_to_idx(remove.y)] = 0
             self.update_snake()
         
             new_distance = self.get_distance(self.apple,self.head)
             
-            if new_distance < old_distance + 0.1:
+            if new_distance < old_distance:
                 reward = 1
             else:
                 reward = -1
@@ -219,7 +212,7 @@ class GameAI:
                                 pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
                 if (bit == self.head):
                     pygame.draw.rect(self.display, BLUE2, 
-                                pygame.Rect(bit.x+4, bit.y+4, 12, 12))
+                                pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
         
             # paint apple 
             pygame.draw.rect(self.display, RED, [

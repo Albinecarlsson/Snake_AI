@@ -20,7 +20,6 @@ torch.set_default_tensor_type('torch.cuda.FloatTensor')
 class Agent:
     def __init__(self):
         self.nr_games = 0
-        self.itervalue = 1
         self.epsilon = 1000  # randomness
         self.gamma = 0.7 # discount rate 
         self.memory = deque(maxlen=MAX_MEMORY) # if the queue get full it will popleft()
@@ -169,7 +168,7 @@ def evaluate(training=False):
     record = 0
     agent = Agent()
     game = GameAI(traning=False)
-    agent.model.load()
+    agent.model.load('model_prediced_mapview.pth')
 
  #traning loop
     while True:

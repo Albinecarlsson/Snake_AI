@@ -10,24 +10,13 @@ torch.set_default_tensor_type('torch.cuda.FloatTensor')
 class Linear_QNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
-        #self.conv2d = nn.Conv2d(1,64, kernel_size=3,padding=1)
-        #self.pooling = nn.MaxPool2d(kernel_size=2, stride=2)
         self.linear1 = nn.Linear(input_size, hidden_size)
-        #self.relu1 = nn.ReLU()
         self.linear2 = nn.Linear(hidden_size, 512)
-        #self.linear3 = nn.Linear(1024, 512)
         self.linear4 = nn.Linear(512, output_size)     
         
     def forward(self, x):
-        #print(x.shape)
-        #x = self.conv2d(x)
-        #print(x.shape)
-        #x = self.pooling(x)
-        #x = x.view(-1,64*5*5)
         x = self.linear1(x)
-        #x = self.relu1(x)
         x = self.linear2(x)
-        #x = self.linear3(x)
         x = self.linear4(x)
         return x
     
@@ -71,15 +60,12 @@ class QTrainer:
             action = torch.unsqueeze(action, 0)
             reward = torch.unsqueeze(reward, 0)
             done = (done, )
-            
-            
-            
+                
         #---  Bellman equation  ---#  
         #Get predicted Q values for current state
         print(state)
         pred = self.model(state)
         target = pred.clone()
-        
         
         # Calculate Q_new values for each of the batch values
         for idx in range(len(done)):
@@ -94,4 +80,5 @@ class QTrainer:
         loss = self.criterion(target, pred)
         loss.backward()
         self.optimizer.step()
+        
         
