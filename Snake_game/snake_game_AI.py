@@ -8,6 +8,8 @@ import itertools
 import numpy as np
 os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = 'hide'
 
+#Change game speed if snake moves to fast! 
+GAME_SPEED = 2
 
 class dir(Enum):
     UP = 1
@@ -15,59 +17,60 @@ class dir(Enum):
     LEFT = 3
     RIGHT = 4
     
-Cords = namedtuple('Cords', 'x, y')
-pygame.init()
-
 #Colours
 WHITE = (255, 255, 255)
 RED = (200,0,0)
+GREEN = (0,255,0)
 BLUE1 = (0, 0, 255)
 BLUE2 = (0, 100, 255)
 GREY1 = (120, 120, 120)
 GREY2 = (70, 70, 70)
 
+#Create named tuple for Cordinates 
+Cords = namedtuple('Cords', 'x, y')
+
 # game variables
 TILE_SIZE = 40
-GAME_SPEED = 2
+pygame.init()
 
 
 class GameAI:
     def __init__(self, WIDTH = 400, HEIGHT = 400, training=False):
         self.WIDTH = WIDTH
         self.HEIGHT = HEIGHT
-        # initialize display
+        # Initialize display
         self.training = training
         if not training:
             self.display = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
             pygame.display.set_caption('Snake')
         self.clock = pygame.time.Clock()
         self.reset()
-    
+        
+    # Convert pixel to index
     def px_to_idx(self,tile_unit):
         return int(tile_unit / TILE_SIZE)      
 
+   # Updates the snake on the board not used for this implementation but for the one with map vision
     def update_snake(self):
         for bit in self.snake:
             self.board[self.px_to_idx(bit.x)][self.px_to_idx(bit.y)] = 1
         self.board[self.px_to_idx(self.head.x)][self.px_to_idx(self.head.y)] = 2
         
     def reset(self):
-        # initialization of the game state.
-        #snake stuff
+        # Initialization of the game state.
         self.dir = dir.RIGHT
         self.head = Cords(self.WIDTH/2,self.HEIGHT/2)
         self.snake = [self.head,
                       Cords(self.head.x-TILE_SIZE,self.head.y),
                       Cords(self.head.x- (2*TILE_SIZE),self.head.y)]
-        # apple stuff
         self.score = 0
         self.apple = None
-        self.steps_made = 0
         self.board = np.zeros((self.px_to_idx(self.WIDTH),self.px_to_idx(self.HEIGHT)))
         self.update_snake()
         self.new_apple()
         self.steps_made = 0
-     
+        
+    # Convert index to pixel size
     def to_px(self,tile_unit):
         return tile_unit * TILE_SIZE
         
@@ -76,12 +79,12 @@ class GameAI:
             x = random.randint(0, (self.WIDTH-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
             y = random.randint(0, (self.HEIGHT-TILE_SIZE)//TILE_SIZE)*TILE_SIZE
             self.apple = Cords(x,y)
-            # if apple is on snake replace apple
+            # If apple is on snake replace apple with new apple 
             if self.apple in self.snake:
                 self.new_apple()
             
     def is_collision_wall(self,pt=None):
-        # if we hit the boarder
+        # Check if snake hits the boarder
         if pt is None:
             pt = self.head
         if (pt.x > self.WIDTH - TILE_SIZE or
@@ -91,7 +94,7 @@ class GameAI:
         return False
     
     def is_collision_snake(self,pt=None):
-        # if sanke hits snake
+        # Check if snake hits snake
         if pt is None:
             pt = self.head
         if (pt in self.snake[1:]):
@@ -99,13 +102,13 @@ class GameAI:
         return False
 
 
-    # Check if there is a collison
+    # Check if there is a collison into wall or snake
     def is_collision(self, pt=None):
         return self.is_collision_snake(pt) or self.is_collision_wall(pt)
                 
         
     def move(self, action):
-        # [straight, right, left]
+        # [straight, right, left] is how moves are represented
         clock_wise = [dir.RIGHT, dir.DOWN, dir.LEFT, dir.UP]
         idx = clock_wise.index(self.dir)
         
@@ -149,25 +152,23 @@ class GameAI:
         #move the snake
         self.move(action)
         self.snake.insert(0,self.head)
-        print(self.board)
-        #check if Game Over
+
         reward = 0
         GAME_OVER = False
-        
+
+        # Check if Game Over by Wall collision    
         if self.is_collision_wall():
             GAME_OVER = True
             reward = int(-200 + 2 * len(self.snake))
             return reward, GAME_OVER, self.score
 
-       #check if Game Over
-        GAME_OVER = False
+       # Check if Game Over by Snake collision
         if self.is_collision_snake():
             GAME_OVER = True
             reward = int(-100 +  len(self.snake))
             return reward, GAME_OVER, self.score
 
-        #check if Game Over
-        GAME_OVER = False
+        # Check if Game Over if stalling to long
         if self.steps_made > 30*len(self.snake):
             GAME_OVER = True
             reward = -200
@@ -182,8 +183,8 @@ class GameAI:
             reward = 10 * len(self.snake)
             self.new_apple()
         else:
+            # Update snake if no apple is eaten
             remove = self.snake.pop()
-            #print(remove)
             self.board[self.px_to_idx(remove.x)][self.px_to_idx(remove.y)] = 0
             self.update_snake()
         
@@ -194,13 +195,13 @@ class GameAI:
             else:
                 reward = -1
             
-        self.update_ui()
+        self.update_game()
         self.clock.tick(GAME_SPEED)
         return reward, GAME_OVER, self.score
             
             
             
-    def update_ui(self):
+    def update_game(self):
         # refill background colours
         bg_colors = itertools.cycle([GREY1, GREY2])
         for y in range(0, self.HEIGHT, TILE_SIZE):
@@ -211,11 +212,11 @@ class GameAI:
         
         #paint the snake
         for bit in self.snake:
-            pygame.draw.rect(self.display, BLUE1, 
+            pygame.draw.rect(self.display, GREEN, 
                              pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
             if (bit == self.head):
-                pygame.draw.rect(self.display, BLUE2, 
-                             pygame.Rect(bit.x+4, bit.y+4, 12, 12))
+                pygame.draw.rect(self.display, BLUE1, 
+                             pygame.Rect(bit.x, bit.y, TILE_SIZE, TILE_SIZE))
        
         # paint apple 
         pygame.draw.rect(self.display, RED, [
